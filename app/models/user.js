@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { lineupSchema } = require('./lineup')
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -6,6 +7,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  lineups: [lineupSchema],
   hashedPassword: {
     type: String,
     required: true
