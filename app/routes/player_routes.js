@@ -74,8 +74,8 @@ router.patch('/players/:id', removeBlanks, (req, res, next) => {
 router.delete('/players/:id', (req, res, next) => {
   Player.findById(req.params.id)
     .then(handle404)
-    .then(example => {
-      example.deleteOne()
+    .then(player => {
+      player.deleteOne()
     })
     .then(() => res.sendStatus(204))
     .catch(next)
