@@ -1,21 +1,33 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-// const Product = require('./product')
-// const User = require('./user')
 
 const lineupSchema = new Schema({
   players: [{ type: Schema.Types.ObjectId, ref: 'Player' }],
-  date: {
-    type: Date
+  name: {
+    type: String
+    // required: true
   },
-  user: {
+  owner: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true }
+    ref: 'User'
+    // required: true
+  }
 }, {
   timestamps: true,
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
+})
+
+lineupSchema.virtual('totalCost').get(function () {
+  let cost = 0
+  if (this.players.length === 0) {
+    return cost
+  } else {
+    for (let i = 0; i < this.players.length; i++) {
+      cost += this.players[i].cost
+    }
+    return cost
+  }
 })
 
 lineupSchema.virtual('fullTeam').get(function () {

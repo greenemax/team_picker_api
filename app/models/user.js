@@ -2,12 +2,12 @@ const mongoose = require('mongoose')
 const { lineupSchema } = require('./lineup')
 
 const userSchema = new mongoose.Schema({
+  lineups: [lineupSchema],
   email: {
     type: String,
     required: true,
     unique: true
   },
-  lineups: [lineupSchema],
   hashedPassword: {
     type: String,
     required: true
