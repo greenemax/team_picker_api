@@ -10,7 +10,6 @@ const passport = require('passport')
 const requireToken = passport.authenticate('bearer', { session: false })
 const deepIndexOf = require('../../lib/deep_indexOf')
 const lodash = require('lodash')
-const errorHandler = require('../../lib/error_handler')
 
 // GET all lineups listed to the user
 router.get('/lineups/', requireToken, (req, res, next) => {
@@ -49,12 +48,13 @@ router.delete('/lineup/:id', requireToken, (req, res, next) => {
     .then(() => res.sendStatus(204))
     .catch(next)
 })
+
 // create a lineup
 router.post('/lineup', requireToken, (req, res, next) => {
   const lineup = req.body.lineup
   lineup.owner = req.user._id
-  // save lineup to mongodb
-  console.log(req.user._id)
+  lineup.active = true
+  console.log(lineup)
   User.findById(req.user._id)
     .then(handle404)
     .then(user => {
@@ -66,17 +66,36 @@ router.post('/lineup', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+// update a lineup
+router.patch('/lineup', requireToken, (req, res, next) => {
+  User.findById(req.user._id)
+    .then(handle404)
+    .then(user => {
+      user.lineup.name.update(
+        { $set:
+          {
+            name: req.body.name
+          }
+        }
+      )
+      user.save()
+    })
+    .then(user => res.status(201).json({ user: user.toObject() }))
+    // on error respond with 500 and error message
+    .catch(next)
+})
+
 // add player to lineup
 router.patch('/lineup/:id', requireToken, (req, res, next) => {
   const id = req.params.id
   const player = req.body.player
+  console.log(player)
   const user = req.user
-  User.findById(user)
-  console.log(user)
-    .then((user) => {
-      const lineup = user.lineup.id(id) // returns a matching subdocument
-      lineup.player.push(player._id) // updates the address while keeping its schema
-      return user.save() // saves document with subdocuments and triggers validation
+  User.findById(req.user._id)
+    .then((lineups) => {
+      const lineup = user.lineups.id(id)
+      lineup.players.push(player)
+      return user.save()
     })
     .then(lineup => res.sendStatus(204))
     .catch(next)
