@@ -17,7 +17,6 @@ router.get('/lineups/', requireToken, (req, res, next) => {
     .populate('lineup.players')
     .then(handle404)
     .then(user => {
-      console.log(user)
       return user.lineups
     })
     .then(lineups => res.status(200).json({ lineup: lineups }))
@@ -30,7 +29,6 @@ router.get('/lineup/:id', requireToken, (req, res, next) => {
     .populate('lineup.players')
     .then(handle404)
     .then(user => {
-      console.log(user)
       return user.lineups.id(req.params.id)
     })
     .then(lineup => res.status(200).json({ lineup: lineup.toObject() }))
@@ -54,7 +52,6 @@ router.post('/lineup', requireToken, (req, res, next) => {
   const lineup = req.body.lineup
   lineup.owner = req.user._id
   lineup.active = true
-  console.log(lineup)
   User.findById(req.user._id)
     .then(handle404)
     .then(user => {
@@ -66,24 +63,24 @@ router.post('/lineup', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// update a lineup
-router.patch('/lineup', requireToken, (req, res, next) => {
-  User.findById(req.user._id)
-    .then(handle404)
-    .then(user => {
-      user.lineup.name.update(
-        { $set:
-          {
-            name: req.body.name
-          }
-        }
-      )
-      user.save()
-    })
-    .then(user => res.status(201).json({ user: user.toObject() }))
-    // on error respond with 500 and error message
-    .catch(next)
-})
+// // update a lineup
+// router.patch('/lineup', requireToken, (req, res, next) => {
+//   User.findById(req.user._id)
+//     .then(handle404)
+//     .then(user => {
+//       user.lineup.name.update(
+//         { $set:
+//           {
+//             name: req.body.name
+//           }
+//         }
+//       )
+//       user.save()
+//     })
+//     .then(user => res.status(201).json({ user: user.toObject() }))
+//     // on error respond with 500 and error message
+//     .catch(next)
+// })
 
 // add player to lineup
 router.patch('/lineup/:id', requireToken, (req, res, next) => {
