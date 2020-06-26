@@ -15,7 +15,13 @@ const requireToken = passport.authenticate('bearer', { session: false })
 
 // instantiate a router (mini app that only handles routes)
 const router = express.Router()
+const cors = require('cors')
+const app = express()
+app.use(cors())
 
+app.get('/user/:id', function (req, res, next) {
+  res.json({msg: 'This is CORS-enabled for all origins!'})
+})
 // SIGN UP
 // POST /sign-up
 router.post('/sign-up', (req, res, next) => {

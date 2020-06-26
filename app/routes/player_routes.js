@@ -4,6 +4,17 @@ const customErrors = require('../../lib/custom_errors')
 const handle404 = customErrors.handle404
 const removeBlanks = require('../../lib/remove_blank_fields')
 const router = express.Router()
+const cors = require('cors')
+const app = express()
+app.use(cors())
+
+app.get('/players/:id', function (req, res, next) {
+  res.json({msg: 'This is CORS-enabled for all origins!'})
+})
+
+app.listen(80, function () {
+  console.log('CORS-enabled web server listening on port 80')
+})
 
 // INDEX
 // GET /examples
