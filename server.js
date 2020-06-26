@@ -2,7 +2,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-
 // require route files
 const playerRoutes = require('./app/routes/player_routes')
 const userRoutes = require('./app/routes/user_routes')

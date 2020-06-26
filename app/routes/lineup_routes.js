@@ -10,13 +10,7 @@ const passport = require('passport')
 const requireToken = passport.authenticate('bearer', { session: false })
 const deepIndexOf = require('../../lib/deep_indexOf')
 const lodash = require('lodash')
-const cors = require('cors')
-const app = express()
-app.use(cors())
 
-app.get('/lineup/:id', function (req, res, next) {
-  res.json({msg: 'This is CORS-enabled for all origins!'})
-})
 // GET all lineups listed to the user
 router.get('/lineups/', requireToken, (req, res, next) => {
   User.findById(req.user)
