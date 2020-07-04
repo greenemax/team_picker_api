@@ -1,6 +1,6 @@
 const express = require('express')
 const User = require('./../models/user')
-// const { Lineup } = require('./../models/lineup')
+const { Lineup } = require('./../models/lineup')
 const customErrors = require('../../lib/custom_errors')
 const handle404 = customErrors.handle404
 // const requireOwnership = customErrors.requireOwnership
@@ -98,23 +98,18 @@ router.patch('/lineup/:id', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-router.patch('/lineup/:id/players', requireToken, (req, res, next) => {
-  const id = req.params.id
-  const player = req.body.player
-  const playerId = player._id
-  const user = req.user
-  User.findById(user)
-    .then(handle404)
-    .then(user => {
-      const lineup = user.lineups.id(id)
-      const deletedPlayer = lineup.player.find(player => player === playerId)
-      const index = deepIndexOf(lineup.players, deletedPlayer)
-      const playerArray = [...lineup.player]
-      lodash.pullAt(playerArray, index)
-      lineup.players = playerArray
-      return lineup.parent().save()
+router.patch('/lineups/:lineupId/players/:playerId', requireToken, (req, res, next) => {
+  console.log(req.user.lineups)
+  const id = req.params.playerId
+  const lineupId = req.params.lineupId
+  // const lineup = req.user.lineups
+  Lineup.findById(lineupId)
+    .then(lineup => {
+      lineup.players.id(id).remove()
+      return lineup.save()
     })
-    .then(lineup => res.sendStatus(204))
+    .then(lineup =>
+      res.sendStatus(204))
     .catch(next)
 })
 
