@@ -2,7 +2,9 @@ const express = require('express')
 const Player = require('../models/player')
 const customErrors = require('../../lib/custom_errors')
 const handle404 = customErrors.handle404
+const passport = require('passport')
 const removeBlanks = require('../../lib/remove_blank_fields')
+const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
 // INDEX
@@ -27,7 +29,7 @@ router.get('/players/:id', (req, res, next) => {
 
 // CREATE
 // POST /examples
-router.post('/players', (req, res, next) => {
+router.post('/players', requireToken, (req, res, next) => {
   Player.create(req.body.player)
     .then(player => {
       res.status(201).json({ player: player.toObject() })
@@ -37,7 +39,7 @@ router.post('/players', (req, res, next) => {
 
 // UPDATE
 // PATCH /examples/5a7db6c74d55bc51bdf39793
-router.patch('/players/:id', removeBlanks, (req, res, next) => {
+router.patch('/players/:id', removeBlanks, requireToken, (req, res, next) => {
   Player.findById(req.params.id)
     .then(handle404)
     .then(player => {
@@ -49,7 +51,7 @@ router.patch('/players/:id', removeBlanks, (req, res, next) => {
 
 // DESTROY
 // DELETE /examples/5a7db6c74d55bc51bdf39793
-router.delete('/players/:id', (req, res, next) => {
+router.delete('/players/:id', requireToken, (req, res, next) => {
   Player.findById(req.params.id)
     .then(handle404)
     .then(player => {
