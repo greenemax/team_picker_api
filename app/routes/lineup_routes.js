@@ -14,7 +14,6 @@ router.get('/lineups/', requireToken, (req, res, next) => {
   User.findById(req.user.id)
     .then(handle404)
     .then(user => {
-      console.log(user.lineups)
       return user.lineups
     })
     .then(lineups => res.status(200).json({ lineup: lineups.toObject() }))
@@ -57,7 +56,6 @@ router.patch('/lineups/:id', removeBlanks, requireToken, (req, res, next) => {
   User.findById(req.user._id)
     .then(handle404)
     .then(user => {
-      console.log(user.lineup)
       user.lineups.id(req.params.id).set(lineup)
       return user.save()
     })
@@ -77,7 +75,7 @@ router.delete('/lineups/:id', requireToken, (req, res, next) => {
     //   return line
     // })
     // .then(lineup => {
-    //   console.log(line)
+
     //   lineup.remove()
     // })
     .then(() => res.sendStatus(204))
