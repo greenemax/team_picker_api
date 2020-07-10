@@ -2,11 +2,12 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const lineupSchema = new Schema({
-  lineupName: {
+  players: [{ type: Schema.Types.ObjectId, ref: 'Player' }],
+  name: {
     type: String
     // required: true
   },
-  user: {
+  owner: {
     type: Schema.Types.ObjectId,
     ref: 'User'
     // required: true

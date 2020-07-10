@@ -1,57 +1,45 @@
 const express = require('express')
-const User = require('./../models/user')
-// const { Lineup } = require('./../models/lineup')
+// const Lineup = require('../models/lineup')
+const User = require('../models/user')
 const customErrors = require('../../lib/custom_errors')
 const handle404 = customErrors.handle404
-// const requireOwnership = customErrors.requireOwnership
-// const removeBlanks = require('../../lib/remove_blank_fields')
-const router = express.Router()
 const passport = require('passport')
+const removeBlanks = require('../../lib/remove_blank_fields')
 const requireToken = passport.authenticate('bearer', { session: false })
-// const deepIndexOf = require('../../lib/deep_indexOf')
-// const lodash = require('lodash')
+const router = express.Router()
 
+// INDEX
 // GET all lineups listed to the user
 router.get('/lineups/', requireToken, (req, res, next) => {
-  User.findById(req.user)
-    .populate('lineup.players')
+  User.findById(req.user.id)
     .then(handle404)
     .then(user => {
+      console.log(user.lineups)
       return user.lineups
     })
-    .then(lineups => res.status(200).json({ lineup: lineups }))
+    .then(lineups => res.status(200).json({ lineup: lineups.toObject() }))
     .catch(next)
 })
 
-// Show a lineup
-router.get('/lineup/:id/', requireToken, (req, res, next) => {
-  User.findById(req.user)
-    .populate('lineup.players')
+// SHOW
+// GET /examples/5a7db6c74d55bc51bdf39793
+router.get('/lineups/:id', requireToken, (req, res, next) => {
+  User.findById(req.user.id)
     .then(handle404)
-    .then(user => {
-      return user.lineups.id(req.params.id)
+    .then((user) => {
+      const line = user.lineups.filter(lineup => {
+        return lineup._id === req.params.id
+      })
+      return line
     })
     .then(lineup => res.status(200).json({ lineup: lineup.toObject() }))
     .catch(next)
 })
 
-// delete a lineup
-router.delete('/lineups/:id', requireToken, (req, res, next) => {
-  User.findById(req.user._id)
-    .then(handle404)
-    .then(user => {
-      user.lineups.id(req.params.id).remove()
-      user.save()
-    })
-    .then(() => res.sendStatus(204))
-    .catch(next)
-})
-
-// create a lineup
-router.post('/lineup-create', requireToken, (req, res, next) => {
+// CREATE
+// POST /examples
+router.post('/lineups/', requireToken, (req, res, next) => {
   const lineup = req.body.lineup
-  lineup.owner = req.user._id
-  lineup.active = true
   User.findById(req.user._id)
     .then(handle404)
     .then(user => {
@@ -62,70 +50,38 @@ router.post('/lineup-create', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// update a lineup
-router.patch('/lineups/:id', requireToken, (req, res, next) => {
+// UPDATE
+// PATCH /examples/5a7db6c74d55bc51bdf39793
+router.patch('/lineups/:id', removeBlanks, requireToken, (req, res, next) => {
+  const lineup = req.body.lineup
   User.findById(req.user._id)
     .then(handle404)
     .then(user => {
-      user.lineup.name.update(
-        { $set:
-          {
-            name: req.body.name
-          }
-        }
-      )
-      user.save()
+      console.log(user.lineup)
+      user.lineups.id(req.params.id).set(lineup)
+      return user.save()
     })
-    .then(user => res.status(201).json({ user: user.toObject() }))
-    // on error respond with 500 and error message
+    .then(() => res.sendStatus(204))
     .catch(next)
 })
 
-// // add player to lineup
-// router.patch('/lineup/:lineupId', requireToken, (req, res, next) => {
-//   const lineupAddId = req.params.lineupId
-//   const player = req.body.player.playerId
-
-//   const user = req.user
-//   const playerId = req.user.lineups.id(lineupAddId).players
-//   Lineup.findById(lineupAddId)
-//     .then((lineups) => {
-
-//       playerId.push(player)
-//       return user.save()
-//     })
-//     .then(lineup => res.sendStatus(204))
-//     .catch(next)
-// })
-//
-// router.patch('/lineups/:lineupId/players/:playerId', requireToken, (req, res, next) => {
-//   const lineupId = req.params.id
-//   const player = req.body.player.playerId
-
-//   const user = req.user
-//   const playerId = req.user.lineups.id(lineupId).players
-//   Lineup.findById(lineupId)
-//     .then((lineups) => {
-//       playerId.players.id(playerId).remove(player)
-//       return user.save()
-//     })
-//     .then(lineup =>
-//       res.sendStatus(204))
-//     .catch(next)
-// })
-//
-// router.patch('/lineup/:id/active', requireToken, (req, res, next) => {
-//   const id = req.params.id
-//   const inputLineup = req.body.lineup
-//   const user = req.user
-//   User.findById(user)
-//     .then((user) => {
-//       const lineup = user.lineup.id(id)
-//       lineup.active = inputLineup.active
-//       return lineup.parent().save()
-//     })
-//     .then(lineup => res.sendStatus(204))
-//     .catch(next)
-// })
+// DESTROY
+// DELETE /examples/5a7db6c74d55bc51bdf39793
+router.delete('/lineups/:id', requireToken, (req, res, next) => {
+  User.findById(req.user.id)
+    .then(handle404)
+    .then((user) => {
+      user.lineups.id(req.params.id).remove()
+      user.save()
+    })
+    //   return line
+    // })
+    // .then(lineup => {
+    //   console.log(line)
+    //   lineup.remove()
+    // })
+    .then(() => res.sendStatus(204))
+    .catch(next)
+})
 
 module.exports = router
